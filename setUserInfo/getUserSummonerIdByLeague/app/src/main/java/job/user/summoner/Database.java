@@ -14,7 +14,7 @@ public class Database {
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             return false;
         }
         return true;
@@ -47,7 +47,7 @@ public class Database {
 
             return new int[]{successCount, failCount, (int)(System.currentTimeMillis() - startTime)};
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             System.out.println("bulkUpsertBySummonerIds error");
             return new int[]{0, summonerIds.length};
         }

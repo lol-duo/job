@@ -21,22 +21,4 @@ public class Log {
 
         System.out.println(ANSI_YELLOW + message + ANSI_RESET);
     }
-
-    public void apiLog(long time) {
-        if(time > 3000)
-            failLog("HTTP 요청 성공 time: " + String.format("%7dms ", time));
-        else if(time > 1500)
-            warningLog("HTTP 요청 성공 time: " + String.format("%7dms ", time));
-        else
-            successLog("HTTP 요청 성공 time: " + String.format("%7dms ", time));
-    }
-
-    public void dbLog(long time) {
-        if(time > 100)
-            failLog("DB 삽입 성공 time: " + String.format("%7dms ", time));
-        else if(time > 50)
-            warningLog("DB 삽입 성공 time: " + String.format("%7dms ", time));
-        else
-            successLog("DB 삽입 성공 time: " + String.format("%7dms ", time));
-    }
 }

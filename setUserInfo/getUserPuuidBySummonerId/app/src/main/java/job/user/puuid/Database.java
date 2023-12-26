@@ -19,7 +19,7 @@ public class Database {
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             return false;
         }
         return true;
@@ -47,7 +47,7 @@ public class Database {
 
             return summonerIds;
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             System.out.println("getSummonerIds error");
             return null;
         }
@@ -73,7 +73,7 @@ public class Database {
                 return -1;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             log.failLog("upsertPuuidBySummonerIds error");
             return -1;
         }

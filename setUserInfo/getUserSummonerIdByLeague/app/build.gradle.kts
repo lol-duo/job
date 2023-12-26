@@ -28,7 +28,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.1")
 
     // mysql-connector-java
-    implementation("mysql:mysql-connector-java:8.0.33")
+    implementation("com.mysql:mysql-connector-j:8.2.0")
 }
 
 

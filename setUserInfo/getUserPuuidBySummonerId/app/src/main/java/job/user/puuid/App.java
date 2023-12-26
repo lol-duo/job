@@ -63,7 +63,7 @@ public class App {
 
 
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         App app = new App();
         if(!app.database.connect()){
             System.out.println("database connect fail");
@@ -75,7 +75,10 @@ public class App {
 
         for(int i = 0; i < 5; i++){
             Thread thread = new Thread(() -> {
-                while(app.runTask());
+                while(true){
+                    if(!app.runTask())
+                        break;
+                }
             });
             thread.start();
             threadList.add(thread);
@@ -85,7 +88,7 @@ public class App {
             try {
                 thread.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                e.printStackTrace(System.out);
             }
         }
     }

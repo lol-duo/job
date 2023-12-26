@@ -4,9 +4,11 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import com.amazonaws.services.sqs.model.*;
+import com.amazonaws.services.sqs.model.DeleteMessageRequest;
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
+import com.amazonaws.services.sqs.model.ReceiveMessageResult;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Aws {
@@ -25,7 +27,7 @@ public class Aws {
                 .build();
     }
 
-    public boolean sendMessage(List<String> args) {
+    public void sendMessage(List<String> args) {
         try {
             SendMessageRequest send_msg_request = new SendMessageRequest()
                     .withQueueUrl(queueUrl)
@@ -34,11 +36,9 @@ public class Aws {
                     .withMessageDeduplicationId(args.get(0));
 
             sqs.sendMessage(send_msg_request);
-            return true;
         } catch (Exception e) {
             System.out.println(args.toString() + " send fail");
-            e.printStackTrace();
-            return false;
+            e.printStackTrace(System.out);
         }
     }
 
@@ -59,7 +59,7 @@ public class Aws {
 
             return new MessageRecord(receiptHandle, summonerIds);
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             return null;
         }
     }
@@ -71,7 +71,7 @@ public class Aws {
                     .withReceiptHandle(receiptHandle);
             sqs.deleteMessage(deleteMessageRequest);
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
     }
 }

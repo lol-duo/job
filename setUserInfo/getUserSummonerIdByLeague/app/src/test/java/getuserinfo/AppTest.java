@@ -3,12 +3,10 @@
  */
 package getuserinfo;
 
-import job.user.summoner.App;
 import org.junit.Test;
 
 public class AppTest {
     @Test public void appHasAGreeting() {
-        App classUnderTest = new App();
 
     }
 }

@@ -63,7 +63,7 @@ public class Api {
 
                 return result;
             } catch (Exception e) {
-                e.printStackTrace();
+                e.printStackTrace(System.out);
                 System.out.println( (i + 1) + "회 HTTP 요청 실패 재시도");
                 try {
                     Thread.sleep(5000);
