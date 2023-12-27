@@ -137,6 +137,9 @@ public class App {
         } else {
             log.failLog("database connect fail");
         }
+
+        app.database.close();
+
         log.slack("Job end");
     }
 }

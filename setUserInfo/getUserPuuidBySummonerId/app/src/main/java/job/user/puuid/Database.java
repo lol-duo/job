@@ -20,7 +20,6 @@ public class Database {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (Exception e) {
             log.failLog("DB connect error" + e.getMessage());
-            e.printStackTrace(System.out);
             return false;
         }
         return true;
@@ -48,7 +47,6 @@ public class Database {
 
             return summonerIds;
         } catch (SQLException e) {
-            e.printStackTrace(System.out);
             log.failLog("getSummonerIds error" + e.getMessage());
             return null;
         }
@@ -73,8 +71,15 @@ public class Database {
                 log.failLog("insert fail summonerId: " + summonerId + " puuid: " + summonerInfo.puuid() + " error code: " + insertSuccess);
             }
         } catch (SQLException e) {
-            e.printStackTrace(System.out);
-            log.failLog("upsertPuuidBySummonerIds error");
+            log.failLog("upsertPuuidBySummonerIds error : " + e.getMessage());
+        }
+    }
+
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            log.failLog("DB disconnect error" + e.getMessage());
         }
     }
 }

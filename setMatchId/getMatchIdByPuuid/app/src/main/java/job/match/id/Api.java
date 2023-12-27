@@ -1,4 +1,4 @@
-package job.user.puuid;
+package job.match.id;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

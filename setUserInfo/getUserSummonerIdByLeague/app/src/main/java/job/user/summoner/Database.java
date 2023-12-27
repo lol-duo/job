@@ -17,7 +17,6 @@ public class Database {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (Exception e) {
             log.failLog("DB connect error : " + e.getMessage());
-            e.printStackTrace(System.out);
             return false;
         }
         return true;
@@ -54,8 +53,15 @@ public class Database {
             return new int[]{successCount, failCount};
         } catch (SQLException e) {
             log.failLog("bulkUpsertBySummonerIds error : " + e.getMessage());
-            e.printStackTrace(System.out);
             return new int[]{0, summonerIds.length};
+        }
+    }
+
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            log.failLog("DB disconnect error" + e.getMessage());
         }
     }
 }
