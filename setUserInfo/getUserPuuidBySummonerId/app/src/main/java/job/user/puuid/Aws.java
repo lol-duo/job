@@ -13,6 +13,7 @@ import java.util.List;
 
 public class Aws {
 
+    Log log = new Log();
 
     String queueName = "SummonerId.fifo";
     String queueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + queueName;
@@ -37,7 +38,7 @@ public class Aws {
 
             sqs.sendMessage(send_msg_request);
         } catch (Exception e) {
-            System.out.println(args.toString() + " send fail");
+            log.failLog(args.toString() + " send fail");
             e.printStackTrace(System.out);
         }
     }
@@ -51,6 +52,8 @@ public class Aws {
                     .withVisibilityTimeout(3000);
 
             ReceiveMessageResult receiveMessageResult = sqs.receiveMessage(receiveMessageRequest);
+            if(receiveMessageResult.getMessages().isEmpty())
+                return null;
 
             String summonerIdListMessage = receiveMessageResult.getMessages().get(0).getBody();
             // [abc, def, ghi] -> abc, def, ghi
@@ -59,6 +62,7 @@ public class Aws {
 
             return new MessageRecord(receiptHandle, summonerIds);
         } catch (Exception e) {
+            log.failLog("SQS receive fail" + e.getMessage());
             e.printStackTrace(System.out);
             return null;
         }
@@ -71,6 +75,7 @@ public class Aws {
                     .withReceiptHandle(receiptHandle);
             sqs.deleteMessage(deleteMessageRequest);
         } catch (Exception e) {
+            log.failLog("SQS delete fail" + e.getMessage());
             e.printStackTrace(System.out);
         }
     }

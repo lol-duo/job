@@ -14,7 +14,7 @@ public class Api {
     public <T> T get(String uri, Class<T> responseType) {
         ObjectMapper objectMapper = new ObjectMapper();
         T result = null;
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
                 // 요청을 보낼 URL 생성
                 URL url = new URL(uri);
@@ -48,15 +48,7 @@ public class Api {
                     continue;
                 }
 
-                long totalTime = System.currentTimeMillis() - startTime;
-
-                // 3초 이상 걸리면 fail, 1.5초 이상 걸리면 warning
-                if(totalTime > 3000)
-                    log.failLog("HTTP 요청 성공 time: " + String.format("%7dms ", totalTime) + "uri: " + uri);
-                else if(totalTime > 1500)
-                    log.warningLog("HTTP 요청 성공 time: " + String.format("%7dms ", totalTime) + "uri: " + uri);
-                else
-                    log.successLog("HTTP 요청 성공 time: " + String.format("%7dms ", totalTime) + "uri: " + uri);
+                log.apiLog(System.currentTimeMillis() - startTime, uri);
 
                 // HttpURLConnection 닫기
                 conn.disconnect();
@@ -64,7 +56,7 @@ public class Api {
                 return result;
             } catch (Exception e) {
                 e.printStackTrace(System.out);
-                System.out.println( (i + 1) + "회 HTTP 요청 실패 재시도");
+                log.failLog((i + 1) + "회 HTTP 요청 실패 재시도");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException ignored) {
@@ -72,7 +64,7 @@ public class Api {
             }
         }
 
-        System.out.println("최종 HTTP 요청 실패 uri: " + uri);
+        log.failLog("최종 HTTP 요청 실패 uri: " + uri);
         return result;
     }
 }

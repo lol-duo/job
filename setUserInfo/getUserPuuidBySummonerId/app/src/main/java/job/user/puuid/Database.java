@@ -19,13 +19,14 @@ public class Database {
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (Exception e) {
+            log.failLog("DB connect error" + e.getMessage());
             e.printStackTrace(System.out);
             return false;
         }
         return true;
     }
 
-    public List<String> getSummonerIds(String summonerId){
+    public List<String> getSummonerIds(String summonerId) {
         try {
             String sql = "SELECT summoner_id FROM user_info WHERE puuid IS NULL AND summoner_id > ? ORDER BY summoner_id LIMIT 1000";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -36,7 +37,7 @@ public class Database {
             List<String> summonerIds = new ArrayList<>();
             while (resultSet.next()) {
                 String now = resultSet.getString("summoner_id");
-                if(now.equals("null"))
+                if (now.equals("null"))
                     break;
 
                 summonerIds.add(now);
@@ -48,14 +49,14 @@ public class Database {
             return summonerIds;
         } catch (SQLException e) {
             e.printStackTrace(System.out);
-            System.out.println("getSummonerIds error");
+            log.failLog("getSummonerIds error" + e.getMessage());
             return null;
         }
     }
 
-    public long upsertPuuidBySummonerIds(SummonerRecord summonerInfo, String summonerId){
-        long startTime = System.currentTimeMillis();
+    public void upsertPuuidBySummonerIds(SummonerRecord summonerInfo, String summonerId) {
         try {
+            long startTime = System.currentTimeMillis();
             String sql = "UPDATE user_info SET puuid = ? WHERE summoner_id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
@@ -66,16 +67,14 @@ public class Database {
 
             preparedStatement.close();
 
-            if(insertSuccess >= 1 || insertSuccess == Statement.SUCCESS_NO_INFO){
-                return (System.currentTimeMillis() - startTime);
+            if (insertSuccess >= 1 || insertSuccess == Statement.SUCCESS_NO_INFO) {
+                log.dbLog(System.currentTimeMillis() - startTime);
             } else {
                 log.failLog("insert fail summonerId: " + summonerId + " puuid: " + summonerInfo.puuid() + " error code: " + insertSuccess);
-                return -1;
             }
         } catch (SQLException e) {
             e.printStackTrace(System.out);
             log.failLog("upsertPuuidBySummonerIds error");
-            return -1;
         }
     }
 }

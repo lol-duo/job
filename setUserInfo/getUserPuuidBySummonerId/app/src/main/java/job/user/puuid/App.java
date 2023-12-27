@@ -1,4 +1,3 @@
-
 package job.user.puuid;
 
 import java.util.ArrayList;
@@ -11,72 +10,64 @@ public class App {
     Api api = new Api();
     Log log = new Log();
 
-    void insertSQS(){
-        System.out.println("SQS 삽입 시작");
+    void insertSQS() {
+        log.log("SQS 삽입 시작");
         String id = "";
         int count = 0;
-        while(true){
+        while (true) {
             List<String> summonerIds = database.getSummonerIds(id);
-            if(summonerIds.isEmpty()){
+            if (summonerIds.isEmpty()) {
                 break;
             }
             id = summonerIds.get(summonerIds.size() - 1);
             count += summonerIds.size();
             aws.sendMessage(summonerIds);
         }
-        System.out.println(count + "개의 데이터 삽입 완료");
+        log.log(count + "개의 데이터 삽입 완료");
     }
 
-    long[] setPuuidBySummonerId(String summonerId){
-        long startTime = System.currentTimeMillis();
+    void setPuuidBySummonerId(String summonerId) {
         SummonerRecord summonerInfo = api.get("http://localhost:8080/summoner/" + summonerId, SummonerRecord.class);
-        if(summonerInfo == null){
-            System.out.println("summonerInfo is null");
-            return null;
+        if (summonerInfo == null) {
+            log.log("summonerInfo is null");
+            return;
         }
-        long apiTime = System.currentTimeMillis() - startTime;
-
-        long dbTime = database.upsertPuuidBySummonerIds(summonerInfo, summonerId);
-        if(dbTime != -1){
-            return new long[]{apiTime, dbTime};
-        }
-        return null;
+        database.upsertPuuidBySummonerIds(summonerInfo, summonerId);
     }
 
-    boolean runTask(){
+    boolean runTask() {
         MessageRecord message = aws.receiveMessage();
 
-        if(message == null)
+        if (message == null)
             return false;
 
         String[] summonerIds = message.summonerIds();
-        for(String summonerId : summonerIds){
-            long[] timeInfo = setPuuidBySummonerId(summonerId);
-            if(timeInfo != null){
-                log.apiLog(timeInfo[0]);
-                log.dbLog(timeInfo[1]);
-            }
+        for (String summonerId : summonerIds) {
+            setPuuidBySummonerId(summonerId);
         }
         aws.deleteMessage(message.receiptHandle());
         return true;
     }
 
 
-
     public static void main(String[] args) {
         App app = new App();
-        if(!app.database.connect()){
-            System.out.println("database connect fail");
+        Log log = new Log();
+
+        log.slack("Job start");
+
+        if (!app.database.connect()) {
+            log.failLog("database connect fail");
             return;
         }
 
         app.insertSQS();
         List<Thread> threadList = new ArrayList<>();
 
-        for(int i = 0; i < 5; i++){
+        for (int i = 0; i < 5; i++) {
             Thread thread = new Thread(() -> {
-                while(true){
-                    if(!app.runTask())
+                while (true) {
+                    if (!app.runTask())
                         break;
                 }
             });
@@ -84,12 +75,15 @@ public class App {
             threadList.add(thread);
         }
 
-        for(Thread thread : threadList){
+        for (Thread thread : threadList) {
             try {
                 thread.join();
             } catch (InterruptedException e) {
+                log.failLog("thread join fail" + e.getMessage());
                 e.printStackTrace(System.out);
             }
         }
+
+        log.slack("Job end");
     }
 }

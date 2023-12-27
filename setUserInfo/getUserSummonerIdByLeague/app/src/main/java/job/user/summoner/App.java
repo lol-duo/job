@@ -7,50 +7,23 @@ public class App {
 
     Api api = new Api();
     Database database = new Database();
+    Log log = new Log();
 
     void logTotal(String league, int[] successCount) {
-        String ANSI_RESET = "\u001B[0m";
-        String ANSI_RED = "\u001B[31m";
-        String ANSI_GREEN = "\u001B[32m";
-        String ANSI_YELLOW = "\u001B[33m";
+        String Success = String.format("%-15s", "success: " + successCount[0]);
+        String Fail = String.format("%-15s", "fail: " + successCount[1]);
 
-        String success = ANSI_GREEN + "success: " + successCount[0] + ANSI_RESET;
-
-        // 전체가 success 면 ANSI_GREEN
-        String total = ANSI_GREEN;
-
-        // failCount 가 0이면 ANSI_GREEN, 아니면 ANSI_RED
-        String fail;
-        if(successCount[1] > 0) {
-            fail = ANSI_RED + "fail: " + successCount[1] + ANSI_RESET;
-            total = ANSI_RED;
+        if (successCount[1] > 0) {
+            log.failLog(Success + Fail + "league: " + league);
+        } else {
+            log.successLog(Success + Fail + "league: " + league);
         }
-        else
-            fail = ANSI_GREEN + "fail: " + successCount[1] + ANSI_RESET;
-
-        // dbTime 이 success 개수 보다 크면 ANSI_RED, success 개수의 절반보다 크면 ANSI_YELLOW, 아니면 ANSI_GREEN
-        String dbTime;
-        if(successCount[2] > successCount[0]) {
-            dbTime = ANSI_RED + " time: " + successCount[2] + "ms" + ANSI_RESET;
-            total = ANSI_RED;
-        }
-        else if(successCount[2] > successCount[0] / 2) {
-            dbTime = ANSI_YELLOW + " time: " + successCount[2] + "ms" + ANSI_RESET;
-            total = ANSI_YELLOW;
-        }
-        else
-            dbTime = ANSI_GREEN + " time: " + successCount[2] + "ms" + ANSI_RESET;
-
-        // 최종 출력
-        System.out.printf(total + "%-15s insert %-15s " + ANSI_RESET, league, success);
-        System.out.printf("%-15s", fail);
-        System.out.printf("%-15s%n", dbTime);
     }
 
     boolean setChallenger() {
         LeagueRecord leagueRecord = api.get("http://localhost:8080/league/challenger", LeagueRecord.class);
-        if(leagueRecord == null){
-            System.out.println("leagueRecord is null");
+        if (leagueRecord == null) {
+            log.failLog("leagueRecord is null");
             return false;
         }
 
@@ -63,8 +36,8 @@ public class App {
 
     boolean setGrandmaster() {
         LeagueRecord leagueRecord = api.get("http://localhost:8080/league/grandmaster", LeagueRecord.class);
-        if(leagueRecord == null){
-            System.out.println("leagueRecord is null");
+        if (leagueRecord == null) {
+            log.failLog("leagueRecord is null");
             return false;
         }
 
@@ -77,8 +50,8 @@ public class App {
 
     boolean setMaster() {
         LeagueRecord leagueRecord = api.get("http://localhost:8080/league/master", LeagueRecord.class);
-        if(leagueRecord == null){
-            System.out.println("leagueRecord is null");
+        if (leagueRecord == null) {
+            log.failLog("leagueRecord is null");
             return false;
         }
 
@@ -91,16 +64,13 @@ public class App {
 
     boolean setTierDivisionPage(String tier, String division, int page) {
         UserEntryRecord[] detailLeagueRecords = api.get("http://localhost:8080/league/" + tier + "/" + division + "/" + page, UserEntryRecord[].class);
-        if(detailLeagueRecords == null){
-            System.out.println("detailLeagueRecords is null");
-            String ANSI_RESET = "\u001B[0m";
-            String ANSI_RED = "\u001B[31m";
-            System.out.printf(ANSI_RED + "%-10s %4s %5d page update fail%n" + ANSI_RESET, tier, division, page);
+        if (detailLeagueRecords == null) {
+            log.failLog("detailLeagueRecords is null" + String.format("%-10s %4s %5d page update fail%n", tier, division, page));
             return false;
         }
 
-        if(detailLeagueRecords.length == 0){
-            System.out.println("detailLeagueRecords is empty");
+        if (detailLeagueRecords.length == 0) {
+            log.log("detailLeagueRecords is empty");
             return false;
         }
 
@@ -114,27 +84,28 @@ public class App {
     public static void main(String[] args) {
         App app = new App();
         Log log = new Log();
+        log.slack("Job start");
 
         String[] tiers = {"DIAMOND"};
         String[] divisions = {"I", "II", "III", "IV"};
 
-        if(app.database.connect()){
+        if (app.database.connect()) {
 
-            if(app.setChallenger())
+            if (app.setChallenger())
                 log.successLog("challenger update success");
             else {
                 log.failLog("challenger update fail");
                 return;
             }
 
-            if(app.setGrandmaster()){
+            if (app.setGrandmaster()) {
                 log.successLog("grandmaster update success");
             } else {
                 log.failLog("grandmaster update fail");
                 return;
             }
 
-            if(app.setMaster()){
+            if (app.setMaster()) {
                 log.successLog("master update success");
             } else {
                 log.failLog("master update fail");
@@ -146,7 +117,7 @@ public class App {
                 for (String division : divisions) {
                     Thread thread = new Thread(() -> {
                         int page = 1;
-                        while(app.setTierDivisionPage(tier, division, page)) {
+                        while (app.setTierDivisionPage(tier, division, page)) {
                             page++;
                         }
                         log.successLog(tier + " " + division + " update success");
@@ -166,6 +137,6 @@ public class App {
         } else {
             log.failLog("database connect fail");
         }
-
+        log.slack("Job end");
     }
 }
