@@ -55,8 +55,7 @@ public class Api {
 
                 return result;
             } catch (Exception e) {
-                e.printStackTrace(System.out);
-                log.failLog((i + 1) + "회 HTTP 요청 실패 재시도");
+                log.failLog((i + 1) + "회 HTTP 요청 실패 재시도 : " + e.getMessage());
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException ignored) {

@@ -1,4 +1,4 @@
-package job.user.summoner;
+package job.match.id;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,9 +11,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class Slack {
-    AppConfig appConfig = AppConfig.getInstance();
-    String cronJobUrl = appConfig.getProperty("slack.cronJobUrl");
-    String myApp = "1-1번 Job ( League 마다 SummonerId 가져오기 )";
+    String cronJobUrl = "";
+    String myApp = "2-1번 Job ( Puuid 별 MatchId 수집 )";
 
     public void send(String message) {
         try {

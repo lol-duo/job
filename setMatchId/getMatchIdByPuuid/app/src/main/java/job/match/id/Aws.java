@@ -1,8 +1,7 @@
-package job.user.puuid;
+package job.match.id;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
@@ -15,14 +14,14 @@ import java.util.List;
 public class Aws {
 
     Log log = new Log();
-    AppConfig appConfig = AppConfig.getInstance();
-    String queueName = "SummonerId.fifo";
+
+    String queueName = "Puuid.fifo";
     String queueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + queueName;
     AmazonSQS sqs;
 
-
     public Aws() {
         AWSCredentials credentials = new AWSCredential();
+
         sqs = AmazonSQSClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion("ap-northeast-2")
@@ -39,7 +38,7 @@ public class Aws {
 
             sqs.sendMessage(send_msg_request);
         } catch (Exception e) {
-            log.failLog(args.toString() + " send fail");
+            log.failLog(args.toString() + " send fail : " + e.getMessage());
         }
     }
 
@@ -50,17 +49,15 @@ public class Aws {
                     .withMaxNumberOfMessages(1)
                     .withWaitTimeSeconds(20)
                     .withVisibilityTimeout(3000);
-
             ReceiveMessageResult receiveMessageResult = sqs.receiveMessage(receiveMessageRequest);
             if (receiveMessageResult.getMessages().isEmpty())
                 return null;
 
-            String summonerIdListMessage = receiveMessageResult.getMessages().get(0).getBody();
+            String puuidListMessage = receiveMessageResult.getMessages().get(0).getBody();
             // [abc, def, ghi] -> abc, def, ghi
-            String[] summonerIds = summonerIdListMessage.replace("[", "").replace("]", "").split(", ");
+            String[] puuids = puuidListMessage.replace("[", "").replace("]", "").split(", ");
             String receiptHandle = receiveMessageResult.getMessages().get(0).getReceiptHandle();
-
-            return new MessageRecord(receiptHandle, summonerIds);
+            return new MessageRecord(receiptHandle, puuids);
         } catch (Exception e) {
             log.failLog("SQS receive fail" + e.getMessage());
             return null;
