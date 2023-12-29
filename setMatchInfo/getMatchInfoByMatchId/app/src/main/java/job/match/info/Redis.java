@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Redis {
-
+    AppConfig appConfig = AppConfig.getInstance();
     String keyFinal = "finalResult";
-    JedisPool pool = new JedisPool("localhost", 6379);
+    JedisPool pool = new JedisPool(appConfig.getProperty("redisUrl"),Integer.valueOf(appConfig.getProperty("redisPort")));
     Jedis jedis;
     Log log = new Log();
 

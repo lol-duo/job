@@ -9,7 +9,7 @@ public class App {
     Database database = new Database();
     Api api = new Api();
     Log log = new Log();
-
+    AppConfig appConfig = AppConfig.getInstance();
     void insertSQS() {
         log.log("SQS 삽입 시작");
         String id = "";
@@ -27,7 +27,7 @@ public class App {
     }
 
     void setPuuidBySummonerId(String summonerId) {
-        SummonerRecord summonerInfo = api.get("http://localhost:8080/summoner/" + summonerId, SummonerRecord.class);
+        SummonerRecord summonerInfo = api.get(appConfig.getProperty("riot.api.server")+ "/summoner/" + summonerId, SummonerRecord.class);
         if (summonerInfo == null) {
             log.log("summonerInfo is null");
             return;

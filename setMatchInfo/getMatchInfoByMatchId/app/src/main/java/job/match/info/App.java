@@ -8,7 +8,7 @@ public class App {
     Redis redis = new Redis();
     Api api = new Api();
     Aws aws = new Aws();
-
+    AppConfig appConfig = AppConfig.getInstance();
     void insertSQS(){
 
         log.log("matchIdList 생성 시작");
@@ -34,7 +34,7 @@ public class App {
         String[] matchIds = message.matchIds();
         List<MatchRecord> matchRecords = new ArrayList<>();
         for(String matchId : matchIds){
-            MatchRecord matchInfo = api.get("http://localhost:8080/matches/" + matchId, MatchRecord.class);
+            MatchRecord matchInfo = api.get(appConfig.getProperty("riot.api.server")+"/matches/" + matchId, MatchRecord.class);
             if(matchInfo == null)
                 continue;
             matchRecords.add(matchInfo);

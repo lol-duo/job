@@ -9,6 +9,7 @@ public class Database {
 
     public static Connection connection = null;
     String leagueList;
+    AppConfig appConfig = AppConfig.getInstance();
     Log log = new Log();
 
     public Database() {
@@ -27,9 +28,9 @@ public class Database {
 
     public boolean connect() {
         // 데이터베이스 연결 정보
-        String jdbcUrl = "";
-        String username = "";
-        String password = "";
+        String jdbcUrl = appConfig.getProperty("jdbcUrl");
+        String username = appConfig.getProperty("username");
+        String password = appConfig.getProperty("password");
 
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);

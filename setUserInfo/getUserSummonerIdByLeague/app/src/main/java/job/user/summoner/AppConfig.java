@@ -1,4 +1,4 @@
-package job.user.puuid;
+package job.user.summoner;
 
 import java.io.IOException;
 import java.io.InputStream;

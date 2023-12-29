@@ -38,6 +38,27 @@ dependencies {
     implementation("com.mysql:mysql-connector-j:8.2.0")
 }
 
+// ex : ./gradlew clean build -Dprofile=test then systemProfile = test
+val systemProfile = System.getProperty("profile")
+if (systemProfile != null) {
+    println("Using profile from system property: $systemProfile")
+    project.extra["profile"] = systemProfile
+} else {
+    println("No profile specified, using the default profile. defauylt profile is 'dev' ")
+    project.extra["profile"] = "dev"
+}
+tasks.processResources {
+    filesMatching("application.properties") {
+        filter { line ->
+            line.replace(Regex("profile=(\\w+)"), "profile=${project.extra["profile"]}")
+        }
+    }
+}
+//빌드시 주석의 인코딩 에러를 방지하기 위해 추가
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {

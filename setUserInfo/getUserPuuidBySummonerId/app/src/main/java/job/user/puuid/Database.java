@@ -7,7 +7,6 @@ import java.util.List;
 public class Database {
 
     public static Connection connection = null;
-
     AppConfig appConfig = AppConfig.getInstance();
     Log log = new Log();
 
