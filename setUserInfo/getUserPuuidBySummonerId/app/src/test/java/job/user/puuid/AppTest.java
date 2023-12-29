@@ -6,6 +6,7 @@ package job.user.puuid;
 import org.junit.Test;
 
 public class AppTest {
-    @Test public void appHasAGreeting() {
+    @Test 
+    public void appHasAGreeting() {
     }
 }
