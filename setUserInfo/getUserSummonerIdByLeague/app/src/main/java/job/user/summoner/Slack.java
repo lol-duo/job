@@ -11,7 +11,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class Slack {
-    String cronJobUrl = "";
+    AppConfig appConfig = AppConfig.getInstance();
+    String cronJobUrl = appConfig.getProperty("slack.cronJobUrl");
     String myApp = "1-1번 Job ( League 마다 SummonerId 가져오기 )";
 
     public void send(String message) {

@@ -9,7 +9,6 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
-    java
 }
 
 repositories {
@@ -38,6 +37,28 @@ java {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
+
+// ex : ./gradlew clean build -Dprofile=test then systemProfile = test
+val systemProfile = System.getProperty("profile")
+if (systemProfile != null) {
+    println("Using profile from system property: $systemProfile")
+    project.extra["profile"] = systemProfile
+} else {
+    println("No profile specified, using the default profile. defauylt profile is 'dev' ")
+    project.extra["profile"] = "dev"
+}
+tasks.processResources {
+    filesMatching("application.properties") {
+        filter { line ->
+            line.replace(Regex("profile=(\\w+)"), "profile=${project.extra["profile"]}")
+        }
+    }
+}
+//빌드시 주석의 인코딩 에러를 방지하기 위해 추가
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 tasks.withType<Jar> {
     manifest {
         attributes["Main-Class"] = "job.user.summoner.App"
