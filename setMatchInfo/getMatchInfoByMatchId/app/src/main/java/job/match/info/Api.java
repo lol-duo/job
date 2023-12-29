@@ -1,4 +1,4 @@
-package job.match.id;
+package job.match.info;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

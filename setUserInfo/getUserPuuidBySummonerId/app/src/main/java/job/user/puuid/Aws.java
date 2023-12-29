@@ -30,11 +30,13 @@ public class Aws {
 
     public void sendMessage(List<String> args) {
         try {
+            String groupId = String.format("%02d%d", (int) (Math.random() * 100), System.currentTimeMillis());
+
             SendMessageRequest send_msg_request = new SendMessageRequest()
                     .withQueueUrl(queueUrl)
                     .withMessageBody(args.toString())
-                    .withMessageGroupId(args.get(0))
-                    .withMessageDeduplicationId(args.get(0));
+                    .withMessageGroupId(groupId)
+                    .withMessageDeduplicationId(groupId);
 
             sqs.sendMessage(send_msg_request);
         } catch (Exception e) {

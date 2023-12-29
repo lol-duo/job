@@ -1,4 +1,4 @@
-package job.user.puuid;
+package job.match.info;
 
 public class Log {
 
@@ -45,11 +45,20 @@ public class Log {
     }
 
     public void dbLog(long time) {
-        if (time > 100)
+        if (time > 1000)
             failLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
-        else if (time > 50)
+        else if (time > 500)
             warningLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
         else
             successLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
+    }
+
+    public void redisLog(long time) {
+        if (time > 100)
+            failLog("Redis 쿼리 성공 time: " + String.format("%7dms ", time));
+        else if (time > 50)
+            warningLog("Redis 쿼리 성공 time: " + String.format("%7dms ", time));
+        else
+            successLog("Redis 쿼리 성공 time: " + String.format("%7dms ", time));
     }
 }

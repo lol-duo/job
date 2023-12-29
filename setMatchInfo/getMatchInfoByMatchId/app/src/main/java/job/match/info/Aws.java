@@ -1,4 +1,4 @@
-package job.match.id;
+package job.match.info;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -15,20 +15,35 @@ public class Aws {
 
     Log log = new Log();
 
-    String queueName = "Puuid.fifo";
-    String queueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + queueName;
-    AmazonSQS sqs;
+    String matchIdQueue = "MatchId.fifo";
+    String matchIdQueueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + matchIdQueue;
+    String matchInfoQueue = "MatchInfo.fifo";
+    String matchInfoQueueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + matchInfoQueue;
+    AmazonSQS matchIdSQS;
+    AmazonSQS matchInfoSQS;
 
     public Aws() {
         AWSCredentials credentials = new AWSCredential();
 
-        sqs = AmazonSQSClientBuilder.standard()
+        matchIdSQS = AmazonSQSClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withRegion("ap-northeast-2")
+                .build();
+
+        matchInfoSQS = AmazonSQSClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion("ap-northeast-2")
                 .build();
     }
 
-    public void sendMessage(List<String> args) {
+    public void sendMessage(List args) {
+        if(args.isEmpty())
+            return;
+
+        String queueUrl = matchIdQueueUrl;
+        if(args.get(0) instanceof MatchRecord)
+            queueUrl = matchInfoQueueUrl;
+
         try {
             String groupId = String.format("%02d%d", (int) (Math.random() * 100), System.currentTimeMillis());
 
@@ -38,28 +53,29 @@ public class Aws {
                     .withMessageGroupId(groupId)
                     .withMessageDeduplicationId(groupId);
 
-            sqs.sendMessage(send_msg_request);
+            matchIdSQS.sendMessage(send_msg_request);
         } catch (Exception e) {
-            log.failLog(args.toString() + " send fail : " + e.getMessage());
+            log.failLog(args + " send fail : " + e.getMessage());
         }
     }
 
-    public MessageRecord receiveMessage() {
+    public MatchIdMessageRecord receiveMessage() {
         try {
             ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest()
-                    .withQueueUrl(queueUrl)
+                    .withQueueUrl(matchIdQueueUrl)
                     .withMaxNumberOfMessages(1)
                     .withWaitTimeSeconds(20)
                     .withVisibilityTimeout(3000);
-            ReceiveMessageResult receiveMessageResult = sqs.receiveMessage(receiveMessageRequest);
+            ReceiveMessageResult receiveMessageResult = matchIdSQS.receiveMessage(receiveMessageRequest);
             if (receiveMessageResult.getMessages().isEmpty())
                 return null;
 
             String puuidListMessage = receiveMessageResult.getMessages().get(0).getBody();
             // [abc, def, ghi] -> abc, def, ghi
-            String[] puuids = puuidListMessage.replace("[", "").replace("]", "").split(", ");
+            String[] matchIds = puuidListMessage.replace("[", "").replace("]", "").split(", ");
             String receiptHandle = receiveMessageResult.getMessages().get(0).getReceiptHandle();
-            return new MessageRecord(receiptHandle, puuids);
+
+            return new MatchIdMessageRecord(receiptHandle, matchIds);
         } catch (Exception e) {
             log.failLog("SQS receive fail" + e.getMessage());
             return null;
@@ -69,9 +85,9 @@ public class Aws {
     public void deleteMessage(String receiptHandle) {
         try {
             DeleteMessageRequest deleteMessageRequest = new DeleteMessageRequest()
-                    .withQueueUrl(queueUrl)
+                    .withQueueUrl(matchIdQueueUrl)
                     .withReceiptHandle(receiptHandle);
-            sqs.deleteMessage(deleteMessageRequest);
+            matchIdSQS.deleteMessage(deleteMessageRequest);
         } catch (Exception e) {
             log.failLog("SQS delete fail" + e.getMessage());
         }

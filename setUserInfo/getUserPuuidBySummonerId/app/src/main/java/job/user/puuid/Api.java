@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Api {
 
@@ -14,6 +16,7 @@ public class Api {
     public <T> T get(String uri, Class<T> responseType) {
         ObjectMapper objectMapper = new ObjectMapper();
         T result = null;
+        List<String> errorLog = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             try {
                 // 요청을 보낼 URL 생성
@@ -44,7 +47,8 @@ public class Api {
 
                     result = objectMapper.readValue(response.toString(), responseType);
                 } else {
-                    log.failLog((i + 1) + "회 HTTP 요청 실패 재시도. 응답 코드: " + responseCode);
+                    log.log((i + 1) + "회 HTTP 요청 실패 재시도. 응답 코드: " + responseCode);
+                    errorLog.add("응답 코드: " + responseCode);
                     continue;
                 }
 
@@ -55,7 +59,8 @@ public class Api {
 
                 return result;
             } catch (Exception e) {
-                log.failLog((i + 1) + "회 HTTP 요청 실패 재시도 : " + e.getMessage());
+                log.log((i + 1) + "회 HTTP 요청 실패 재시도 : " + e.getMessage());
+                errorLog.add(e.getMessage());
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException ignored) {
@@ -63,7 +68,7 @@ public class Api {
             }
         }
 
-        log.failLog("최종 HTTP 요청 실패 uri: " + uri);
+        log.failLog("최종 HTTP 요청 실패 uri: " + uri + "\nerrorLog: " + errorLog);
         return result;
     }
 }
