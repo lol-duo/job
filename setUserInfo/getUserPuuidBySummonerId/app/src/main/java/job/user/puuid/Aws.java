@@ -15,17 +15,13 @@ import java.util.List;
 public class Aws {
 
     Log log = new Log();
-    AppConfig appConfig = AppConfig.getInstance();
     String queueName = "SummonerId.fifo";
     String queueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + queueName;
     AmazonSQS sqs;
 
 
     public Aws () {
-        String accessKey = appConfig.getProperty("aws.accessKey");
-        String secretKey = appConfig.getProperty("aws.secretKey");
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-
+        AWSCredentials credentials = new AWSCredential();
         sqs = AmazonSQSClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion("ap-northeast-2")
