@@ -48,7 +48,7 @@ public class Slack {
                 System.out.println(response);
             }
         } catch (Exception e) {
-            e.printStackTrace(System.out);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -60,7 +60,7 @@ public class Slack {
             // record -> json
             return mapper.writeValueAsString(slackTemplateRecord);
         } catch (JsonProcessingException e) {
-            e.printStackTrace(System.out);
+            System.out.println(e.getMessage());
         }
         return null;
     }

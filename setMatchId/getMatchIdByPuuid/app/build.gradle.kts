@@ -21,6 +21,21 @@ dependencies {
 
     // This dependency is used by the application.
     implementation(libs.guava)
+
+    // com.fasterxml.jackson.databind.ObjectMapper;
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.1")
+
+    // redis
+    implementation("redis.clients:jedis:5.1.0")
+
+    implementation("org.slf4j:slf4j-api:2.0.5")
+    implementation("org.slf4j:slf4j-simple:2.0.5")
+
+    // aws sdk
+    implementation("com.amazonaws:aws-java-sdk-sqs:1.12.625")
+
+    // mysql-connector-java
+    implementation("com.mysql:mysql-connector-j:8.2.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -28,6 +43,15 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "job.match.id.App"
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 }
 
 application {

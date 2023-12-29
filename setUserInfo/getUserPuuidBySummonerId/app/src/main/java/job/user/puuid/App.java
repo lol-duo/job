@@ -64,7 +64,7 @@ public class App {
         app.insertSQS();
         List<Thread> threadList = new ArrayList<>();
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             Thread thread = new Thread(() -> {
                 while (true) {
                     if (!app.runTask())
@@ -80,10 +80,10 @@ public class App {
                 thread.join();
             } catch (InterruptedException e) {
                 log.failLog("thread join fail" + e.getMessage());
-                e.printStackTrace(System.out);
             }
         }
 
+        app.database.close();
         log.slack("Job end");
     }
 }
