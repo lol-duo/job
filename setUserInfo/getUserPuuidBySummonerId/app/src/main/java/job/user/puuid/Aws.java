@@ -2,6 +2,7 @@ package job.user.puuid;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
@@ -14,14 +15,13 @@ import java.util.List;
 public class Aws {
 
     Log log = new Log();
-
     String queueName = "SummonerId.fifo";
     String queueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + queueName;
     AmazonSQS sqs;
 
-    public Aws() {
-        AWSCredentials credentials = new AWSCredential();
 
+    public Aws () {
+        AWSCredentials credentials = new AWSCredential();
         sqs = AmazonSQSClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion("ap-northeast-2")
