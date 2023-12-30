@@ -8,6 +8,7 @@ import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -47,9 +48,11 @@ public class Aws {
         try {
             String groupId = String.format("%02d%d", (int) (Math.random() * 100), System.currentTimeMillis());
 
+            ObjectMapper objectMapper = new ObjectMapper();
+
             SendMessageRequest send_msg_request = new SendMessageRequest()
                     .withQueueUrl(queueUrl)
-                    .withMessageBody(args.toString())
+                    .withMessageBody(objectMapper.writeValueAsString(args))
                     .withMessageGroupId(groupId)
                     .withMessageDeduplicationId(groupId);
 
@@ -71,8 +74,9 @@ public class Aws {
                 return null;
 
             String puuidListMessage = receiveMessageResult.getMessages().get(0).getBody();
-            // [abc, def, ghi] -> abc, def, ghi
-            String[] matchIds = puuidListMessage.replace("[", "").replace("]", "").split(", ");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String[] matchIds = objectMapper.readValue(puuidListMessage, String[].class);
             String receiptHandle = receiveMessageResult.getMessages().get(0).getReceiptHandle();
 
             return new MatchIdMessageRecord(receiptHandle, matchIds);

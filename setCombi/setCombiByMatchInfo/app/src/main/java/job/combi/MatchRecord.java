@@ -1,4 +1,4 @@
-package job.match.info;
+package job.combi;
 
 public record MatchRecord(
         MetadataRecord metadata,
