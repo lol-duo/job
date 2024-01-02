@@ -4,6 +4,15 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/setCombi/setCombiByMatchInfo" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/setCombi/setCombiByMatchInfo" />
+            <option value="$PROJECT_DIR$/setCombi/setCombiByMatchInfo/app" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/setMatchId/getMatchIdByPuuid" />
         <option name="modules">
           <set>
