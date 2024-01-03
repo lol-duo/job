@@ -43,7 +43,7 @@ public class Redis {
     public MatchIdRecord getMatchIdList(String id) {
         ScanParams scanParams = new ScanParams().count(1000);
         ScanResult<String> scanResult = jedis.sscan(keyFinal, id, scanParams);
-        return new MatchIdRecord(id, scanResult.getResult());
+        return new MatchIdRecord(scanResult.getCursor(), scanResult.getResult());
     }
 
     public void setNewMatchIdList() {
