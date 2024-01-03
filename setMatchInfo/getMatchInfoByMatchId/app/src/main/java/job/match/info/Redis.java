@@ -67,6 +67,10 @@ public class Redis {
             for(String key : oldKeyList)
                 transaction.sdiffStore(keyFinal, keyFinal, key);
 
+            // 새로운 키들을 old로 변경
+            for(String key : newKeyList)
+                transaction.rename(key, key.replace("new_", "old_"));
+
             transaction.exec();
         } catch (Exception e) {
             // 오류 발생 시 트랜잭션 취소
