@@ -6,8 +6,8 @@ import redis.clients.jedis.params.ScanParams;
 import redis.clients.jedis.resps.ScanResult;
 
 public class Redis {
-
-    JedisPool pool = new JedisPool("localhost", 6379);
+    AppConfig appConfig = AppConfig.getInstance();
+    JedisPool pool = new JedisPool(appConfig.getProperty("redisUrl"),Integer.valueOf(appConfig.getProperty("redisPort")));
     Jedis jedis;
     Log log = new Log();
 

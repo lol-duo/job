@@ -8,7 +8,8 @@ public class App {
     Api api = new Api();
     Database database = new Database();
     Log log = new Log();
-
+    AppConfig appConfig = AppConfig.getInstance();
+    
     void logTotal(String league, int[] successCount) {
         String Success = String.format("%-15s", "success: " + successCount[0]);
         String Fail = String.format("%-15s", "fail: " + successCount[1]);
@@ -21,7 +22,7 @@ public class App {
     }
 
     boolean setChallenger() {
-        LeagueRecord leagueRecord = api.get("http://localhost:8080/league/challenger", LeagueRecord.class);
+        LeagueRecord leagueRecord = api.get(appConfig.getProperty("riot.api.server")+"/league/challenger", LeagueRecord.class);
         if (leagueRecord == null) {
             log.failLog("leagueRecord is null");
             return false;
@@ -35,7 +36,7 @@ public class App {
     }
 
     boolean setGrandmaster() {
-        LeagueRecord leagueRecord = api.get("http://localhost:8080/league/grandmaster", LeagueRecord.class);
+        LeagueRecord leagueRecord = api.get(appConfig.getProperty("riot.api.server")+"/league/grandmaster", LeagueRecord.class);
         if (leagueRecord == null) {
             log.failLog("leagueRecord is null");
             return false;
@@ -49,7 +50,7 @@ public class App {
     }
 
     boolean setMaster() {
-        LeagueRecord leagueRecord = api.get("http://localhost:8080/league/master", LeagueRecord.class);
+        LeagueRecord leagueRecord = api.get(appConfig.getProperty("riot.api.server")+"/league/master", LeagueRecord.class);
         if (leagueRecord == null) {
             log.failLog("leagueRecord is null");
             return false;
@@ -63,7 +64,7 @@ public class App {
     }
 
     boolean setTierDivisionPage(String tier, String division, int page) {
-        UserEntryRecord[] detailLeagueRecords = api.get("http://localhost:8080/league/" + tier + "/" + division + "/" + page, UserEntryRecord[].class);
+        UserEntryRecord[] detailLeagueRecords = api.get(appConfig.getProperty("riot.api.server")+"/league/" + tier + "/" + division + "/" + page, UserEntryRecord[].class);
         if (detailLeagueRecords == null) {
             log.failLog("detailLeagueRecords is null" + String.format("%-10s %4s %5d page update fail%n", tier, division, page));
             return false;
@@ -97,7 +98,7 @@ public class App {
                 log.failLog("challenger update fail");
                 return;
             }
-
+            
             if (app.setGrandmaster()) {
                 log.successLog("grandmaster update success");
             } else {
@@ -133,6 +134,7 @@ public class App {
                 }
                 threadList.clear();
             }
+            
 
         } else {
             log.failLog("database connect fail");

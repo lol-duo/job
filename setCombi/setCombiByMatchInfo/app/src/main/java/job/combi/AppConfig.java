@@ -1,4 +1,4 @@
-package job.user.puuid;
+package job.combi;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,9 +7,8 @@ import java.util.Properties;
 public class AppConfig {
 
     private static final AppConfig instance = new AppConfig();
-    private static Log log = new Log();
     private Properties properties = new Properties();
-
+    private static Log log = new Log();
     public AppConfig(){
 
         loadCommonProperties();  // 공통 설정 로드

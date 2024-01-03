@@ -1,0 +1,68 @@
+name: Set UserInfo SummonerId CI
+on:
+  push:
+    branches: ["setUserInfo-SummondId"]
+
+env:
+  S3_BUCKET_NAME: deploy.lol-duo
+  JOB_NAME: set-user-info-summoner-id-prod
+  AWS_REGION : ap-northeast-2
+  PROPERTEIS_DIR : ./setUserInfo/getUserSummonerIdByLeague
+  PROPERTEIS_FILE : ./app/src/main/resources/application-prod.properties
+  TAG: set-user-info-summoner-id-prod-${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 코드 저장소에 올려둔 코드를 CI 서버로 내려받는 과정
+      - uses: actions/checkout@v3
+      # 자바 17 설치 과정
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      # github Secrect prod properties에 추가하는 과정
+      - name: Copy Secret
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          echo ${{ secrets.PROD_SECRECT }} | base64 --decode > ${{ env.PROPERTEIS_FILE }}
+
+       # gradle을 사용하여 빌드하는 과정
+      - name: Grant execute permission for gradlew
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          chmod +x gradlew
+
+      - name: Build with Gradle (Prod Profile)
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          ./gradlew clean build -Dprofile=prod
+
+      - name: Make Directory
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          mkdir deploy
+
+      - name: Copy Jar
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          cp ./app/build/libs/*.jar ./deploy
+                                   
+      - name: Make zip file
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          zip -r ./${{ env.TAG }}.zip ./deploy
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: upload to s3
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.TAG }}.zip s3://${{ env.S3_BUCKET_NAME }}/${{ env.JOB_NAME }}/       

@@ -18,9 +18,7 @@ public class Aws {
     String queueName = "SummonerId.fifo";
     String queueUrl = "https://sqs.ap-northeast-2.amazonaws.com/809120139230/" + queueName;
     AmazonSQS sqs;
-
-
-    public Aws () {
+    public Aws() {
         AWSCredentials credentials = new AWSCredential();
         sqs = AmazonSQSClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))

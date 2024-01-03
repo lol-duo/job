@@ -10,7 +10,7 @@ public class App {
     Redis redis = new Redis();
     Api api = new Api();
     Log log = new Log();
-
+    AppConfig appConfig = AppConfig.getInstance();
     void insertSQS() {
         log.log("SQS 삽입 시작");
         String id = "";
@@ -28,7 +28,7 @@ public class App {
     }
 
     void setMatchIdByPuuid(String puuid) {
-        String[] matchIds = api.get("http://localhost:8080/matches/by-puuid/" + puuid, String[].class);
+        String[] matchIds = api.get(appConfig.getProperty("riot.api.server")+"/matches/by-puuid/" + puuid, String[].class);
         if (matchIds == null) {
             log.log("matchId is null");
             return;
@@ -68,7 +68,10 @@ public class App {
             log.failLog("redis connect fail");
             return;
         }
-
+        else{
+             log.successLog("redis connect sucess");
+        }
+         
         app.insertSQS();
         List<Thread> threadList = new ArrayList<>();
 
@@ -95,5 +98,6 @@ public class App {
         app.database.close();
 
         log.slack("Job end");
+        
     }
 }
