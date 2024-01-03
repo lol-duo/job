@@ -53,12 +53,12 @@ jobs:
       - name: Copy appsec.yml
         run: |
           cd ${{env.PROPERTEIS_DIR}}
-          cp ./appsec.yml ./deploy
+          cp appsec.yml ./deploy
 
       - name: Copy deploy.sh
         run: |
             cd ${{env.PROPERTEIS_DIR}}
-            cp ./deploy.sh ./deploy
+            cp deploy.sh ./deploy
           
       - name: Make zip file
         run: |
