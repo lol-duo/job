@@ -75,4 +75,9 @@ jobs:
       - name: upload to s3
         run: |
           cd ${{env.PROPERTEIS_DIR}}
-          aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.TAG }}.zip s3://${{ env.S3_BUCKET_NAME }}/${{ env.JOB_NAME }}/       
+          aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.TAG }}.zip s3://${{ env.S3_BUCKET_NAME }}/${{ env.JOB_NAME }}/
+          
+      - name: upload to s3 latest
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.JOB_NAME }}.zip s3://${{ env.S3_BUCKET_NAME }}/${{ env.JOB_NAME }}/latest/             
