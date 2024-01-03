@@ -50,10 +50,10 @@ jobs:
           cd ${{env.PROPERTEIS_DIR}}
           cp ./app/build/libs/*.jar ./deploy
 
-      - name: Copy appsec.yml
+      - name: Copy appspec.yml
         run: |
           cd ${{env.PROPERTEIS_DIR}}
-          cp appsec.yml ./deploy
+          cp appspec.yml ./deploy
 
       - name: Copy deploy.sh
         run: |
