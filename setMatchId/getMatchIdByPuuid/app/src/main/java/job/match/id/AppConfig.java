@@ -9,7 +9,7 @@ public class AppConfig {
     private static final AppConfig instance = new AppConfig();
 
     private Properties properties = new Properties();
-
+    private static Log log = new Log();
     public AppConfig(){
 
         loadCommonProperties();  // 공통 설정 로드
@@ -40,12 +40,11 @@ public class AppConfig {
             if (input != null) {
                 properties.load(input);
             } else {
-                System.out.println("Unable to find application.properties");
+                log.failLog("Unable to find " + fileName + " in application.properties, Properties Name : " + fileName);
             }
         }
         catch (IOException e) {
-            System.out.println("Unable to find application.properties");
-            e.printStackTrace();
+            log.failLog("Unable to find application.properties, errorMessage : " + e.getMessage());
         }
         return properties;
     }

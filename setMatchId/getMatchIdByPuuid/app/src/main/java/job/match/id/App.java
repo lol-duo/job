@@ -57,7 +57,7 @@ public class App {
         App app = new App();
         Log log = new Log();
 
-        //log.slack("Job start");
+        log.slack("Job start");
 
         if (!app.database.connect()) {
             log.failLog("database connect fail");
@@ -97,7 +97,7 @@ public class App {
         app.redis.close();
         app.database.close();
 
-        //log.slack("Job end");
+        log.slack("Job end");
         
     }
 }
