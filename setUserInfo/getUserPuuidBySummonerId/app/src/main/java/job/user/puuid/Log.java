@@ -45,9 +45,9 @@ public class Log {
     }
 
     public void dbLog(long time) {
-        if (time > 100)
+        if (time > 500)
             failLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
-        else if (time > 50)
+        else if (time > 300)
             warningLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
         else
             successLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
