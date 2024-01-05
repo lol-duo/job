@@ -10,7 +10,6 @@ env:
   PROPERTEIS_DIR : ./setMatchId/getMatchIdByPuuid
   PROPERTEIS_FILE : ./app/src/main/resources/application-prod.properties
   TAG: set-match-id-prod-${{ github.sha }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -49,7 +48,17 @@ jobs:
         run: |
           cd ${{env.PROPERTEIS_DIR}}
           cp ./app/build/libs/*.jar ./deploy
-                                   
+
+      - name: Copy appspec.yml
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          cp appspec.yml ./deploy
+    
+      - name: Copy deploy.sh
+        run: |
+          cd ${{env.PROPERTEIS_DIR}}
+          cp deploy.sh ./deploy
+                                                 
       - name: Make zip file
         run: |
           cd ${{env.PROPERTEIS_DIR}}
@@ -65,4 +74,4 @@ jobs:
       - name: upload to s3
         run: |
           cd ${{env.PROPERTEIS_DIR}}
-          aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.TAG }}.zip s3://${{ env.S3_BUCKET_NAME }}/${{ env.JOB_NAME }}/       
+          aws s3 cp --region ${{ env.AWS_REGION }} ./${{ env.TAG }}.zip s3://${{ env.S3_BUCKET_NAME }}/${{ env.JOB_NAME }}/   
