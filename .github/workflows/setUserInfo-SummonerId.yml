@@ -1,7 +1,7 @@
 name: Set UserInfo SummonerId CI
 on:
   push:
-    branches: ["setUserInfo-SummondId"]
+    branches: ["setUserInfo-SummonerId"]
 
 env:
   S3_BUCKET_NAME: deploy.lol-duo
