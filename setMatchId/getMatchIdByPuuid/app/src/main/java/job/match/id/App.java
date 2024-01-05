@@ -97,7 +97,7 @@ public class App {
         app.redis.close();
         app.database.close();
 
+        app.api.startNextJob();
         log.slack("Job end");
-        
     }
 }
