@@ -12,6 +12,31 @@ import java.util.List;
 public class Api {
 
     Log log = new Log();
+    AppConfig appConfig = AppConfig.getInstance();
+
+    public void startNextJob(){
+        try{
+            URL url = new URL(appConfig.getProperty("jobURL"));
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(5000);
+
+            //set body
+            conn.setDoOutput(true);
+            conn.getOutputStream().write("set-combi-prod".getBytes());
+            conn.getOutputStream().flush();
+            conn.getOutputStream().close();
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                log.log("다음 작업 시작 성공");
+            } else {
+                log.failLog("다음 작업 시작 실패 응답 코드: " + responseCode);
+            }
+        } catch (Exception e) {
+            log.failLog("다음 작업 시작 실패 " + e.getMessage());
+        }
+    }
 
     public <T> T get(String uri, Class<T> responseType) {
         ObjectMapper objectMapper = new ObjectMapper();
