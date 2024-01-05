@@ -84,6 +84,7 @@ public class App {
 
         app.redis.close();
 
+        app.api.startNextJob();
         app.log.slack("Job end");
     }
 }
