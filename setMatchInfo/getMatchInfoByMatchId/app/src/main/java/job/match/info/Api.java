@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +23,14 @@ public class Api {
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
 
+            String requestBody = "set-combi-prod";
+
             //set body
             conn.setDoOutput(true);
-            conn.getOutputStream().write("set-combi-prod".getBytes());
-            conn.getOutputStream().flush();
-            conn.getOutputStream().close();
+            OutputStream os = conn.getOutputStream();
+            os.write(requestBody.getBytes(StandardCharsets.UTF_8));
+            os.flush();
+            os.close();
 
             int responseCode = conn.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
