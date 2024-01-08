@@ -38,7 +38,7 @@ public class Log {
     public void apiLog(long time, String uri) {
         if (time > 3000)
             failLog("HTTP 요청 성공 time: " + String.format("%7dms ", time) + " uri: " + uri);
-        else if (time > 1500)
+        else if (time > 2000)
             warningLog("HTTP 요청 성공 time: " + String.format("%7dms ", time) + " uri: " + uri);
         else
             successLog("HTTP 요청 성공 time: " + String.format("%7dms ", time) + " uri: " + uri);
