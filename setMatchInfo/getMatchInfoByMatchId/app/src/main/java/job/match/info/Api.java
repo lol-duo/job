@@ -25,6 +25,9 @@ public class Api {
 
             String requestBody = "set-combi-prod";
 
+            //set header
+            conn.setRequestProperty("Content-Type", "text/plain");
+
             //set body
             conn.setDoOutput(true);
             OutputStream os = conn.getOutputStream();
