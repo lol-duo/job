@@ -28,7 +28,7 @@ public class Log {
         String ANSI_YELLOW = "\u001B[33m";
 
         System.out.println(ANSI_YELLOW + message + ANSI_RESET);
-        slack(message);
+        //slack(message);
     }
 
     public void dbLog(long time) {
