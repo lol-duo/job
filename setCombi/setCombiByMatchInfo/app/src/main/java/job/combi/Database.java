@@ -27,13 +27,13 @@ public class Database {
     public List<Combi> upsertCombi(List<Combi> combiInfos) {
         try {
             // combi 설정
-            String sql = "INSERT IGNORE INTO combi (champion_id, lane, main_perk) VALUES (?, ?, ?)";
+            String sql = "INSERT IGNORE INTO combi (champion_id, lane, main_perk) VALUES (?, ?, ?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            int i = 1;
             for (Combi combi : combiInfos) {
-                preparedStatement.setInt(1, combi.championId());
-                preparedStatement.setString(2, combi.lane());
-                preparedStatement.setInt(3, combi.main_perk());
-                preparedStatement.addBatch();
+                preparedStatement.setInt(i++, combi.championId());
+                preparedStatement.setString(i++, combi.lane());
+                preparedStatement.setInt(i++, combi.main_perk());
             }
             preparedStatement.executeBatch();
 

@@ -119,7 +119,7 @@ public class App {
         }
 
         List<Thread> threads = new ArrayList<>();
-        for(int i = 0; i < 5; i++) {
+        for(int i = 0; i < 1; i++) {
             Thread thread = new Thread(() -> {
                 while (true) {
                     if(!app.runTask())
