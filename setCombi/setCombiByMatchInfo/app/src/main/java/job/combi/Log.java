@@ -32,7 +32,7 @@ public class Log {
     }
 
     public void dbLog(long time) {
-        if (time > 1000)
+        if (time > 3000)
             failLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
         else if (time > 500)
             warningLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
