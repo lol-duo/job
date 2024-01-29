@@ -37,7 +37,6 @@ public class Database {
                 preparedStatement.setString(i++, combi.lane());
                 preparedStatement.setInt(i++, combi.main_perk());
             }
-            System.out.println(preparedStatement.toString());
             preparedStatement.executeBatch();
 
 
