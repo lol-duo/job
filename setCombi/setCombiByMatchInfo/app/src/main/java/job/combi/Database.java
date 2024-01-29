@@ -27,8 +27,10 @@ public class Database {
     public List<Combi> upsertCombi(List<Combi> combiInfos) {
         try {
             // combi 설정
-            String sql = "INSERT IGNORE INTO combi (champion_id, lane, main_perk) VALUES (?, ?, ?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?), (?,?,?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            String sb = "INSERT IGNORE INTO combi (champion_id, lane, main_perk) VALUES (?, ?, ?)" +
+                    ", (?, ?, ?)".repeat(Math.max(0, combiInfos.size() - 1));
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sb);
             int i = 1;
             for (Combi combi : combiInfos) {
                 preparedStatement.setInt(i++, combi.championId());
@@ -37,19 +39,42 @@ public class Database {
             }
             preparedStatement.executeBatch();
 
-            // combi pk 설정
-            sql = "SELECT combi_id FROM combi WHERE champion_id = ? AND lane = ? AND main_perk = ?";
-            preparedStatement = connection.prepareStatement(sql);
-            for (Combi combi : combiInfos) {
-                preparedStatement.setInt(1, combi.championId());
-                preparedStatement.setString(2, combi.lane());
-                preparedStatement.setInt(3, combi.main_perk());
 
-                ResultSet resultSet = preparedStatement.executeQuery();
-                resultSet.next();
-                combi.setCombiId(resultSet.getInt("combi_id"));
+            // combi pk 설정
+            StringBuilder queryBuilder = new StringBuilder();
+
+            // 각 Combi 객체에 대한 쿼리를 생성합니다.
+            for (i = 0; i < combiInfos.size(); i++) {
+                Combi combi = combiInfos.get(i);
+                if (i > 0) {
+                    queryBuilder.append(" UNION ALL ");
+                }
+                queryBuilder.append("SELECT combi_id, champion_id, lane, main_perk FROM combi WHERE champion_id = ")
+                        .append(combi.championId())
+                        .append(" AND lane = '")
+                        .append(combi.lane())
+                        .append("' AND main_perk = ")
+                        .append(combi.main_perk());
             }
 
+            // 완성된 쿼리를 실행합니다.
+            preparedStatement = connection.prepareStatement(queryBuilder.toString());
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // 결과를 처리합니다.
+            while (resultSet.next()) {
+                int combiId = resultSet.getInt("combi_id");
+                int championId = resultSet.getInt("champion_id");
+                String lane = resultSet.getString("lane");
+                int mainPerk = resultSet.getInt("main_perk");
+
+                for (Combi combi : combiInfos) {
+                    if (combi.championId() == championId && combi.lane().equals(lane) && combi.main_perk() == mainPerk) {
+                        combi.setCombiId(combiId);
+                        break;
+                    }
+                }
+            }
             return combiInfos;
         } catch (SQLException e) {
             log.failLog("DB upsertCombi error" + e.getMessage());
@@ -60,19 +85,28 @@ public class Database {
     public void insertSoloInfo(List<Combi> combiList) {
         try {
             long start = System.currentTimeMillis();
-            String sql = "INSERT INTO match_solo_info (combi_id, win, lose, win_rate, game_version) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE win = win + ?, lose = lose + ?, win_rate = win / (win + lose) * 10000";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append("INSERT INTO match_solo_info (combi_id, win, lose, win_rate, game_version) VALUES ");
+
+            int count = 0;
             for (Combi combi : combiList) {
-                preparedStatement.setInt(1, combi.combiId());
-                preparedStatement.setInt(2, combi.win() ? 1 : 0);
-                preparedStatement.setInt(3, combi.win() ? 0 : 1);
-                preparedStatement.setInt(4, combi.win() ? 10000 : 0);
-                preparedStatement.setString(5, combi.gameVersion());
-                preparedStatement.setInt(6, combi.win() ? 1 : 0);
-                preparedStatement.setInt(7, combi.win() ? 0 : 1);
-                preparedStatement.addBatch();
+                if (count > 0) {
+                    sqlBuilder.append(",");
+                }
+                sqlBuilder.append("(")
+                        .append(combi.combiId()).append(", ")
+                        .append(combi.win() ? 1 : 0).append(", ")
+                        .append(combi.win() ? 0 : 1).append(", ")
+                        .append(combi.win() ? 10000 : 0).append(", '")
+                        .append(combi.gameVersion()).append("')");
+                count++;
             }
-            preparedStatement.executeBatch();
+
+            sqlBuilder.append(" ON DUPLICATE KEY UPDATE win = win + VALUES(win), lose = lose + VALUES(lose), win_rate = win / (win + lose) * 10000");
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString());
+            preparedStatement.executeUpdate();
+
             log.dbLog(System.currentTimeMillis() - start);
         } catch (SQLException e) {
             log.failLog("DB insertSoloInfo error" + e.getMessage());
@@ -82,21 +116,29 @@ public class Database {
     public void insertDuoInfo(List<MatchDuoInfoRecord> duoInfoRecords){
         try {
             long start = System.currentTimeMillis();
-            String sql = "INSERT INTO match_duo_info (combi_id_1, combi_id_2, win, lose, win_rate, game_version) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE win = win + ?, lose = lose + ?, win_rate = win / (win + lose) * 10000";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append("INSERT INTO match_duo_info (combi_id_1, combi_id_2, win, lose, win_rate, game_version) VALUES ");
 
+            int count = 0;
             for (MatchDuoInfoRecord duoInfoRecord : duoInfoRecords) {
-                preparedStatement.setInt(1, duoInfoRecord.combiId1());
-                preparedStatement.setInt(2, duoInfoRecord.combiId2());
-                preparedStatement.setInt(3, duoInfoRecord.win() ? 1 : 0);
-                preparedStatement.setInt(4, duoInfoRecord.win() ? 0 : 1);
-                preparedStatement.setInt(5, duoInfoRecord.win() ? 10000 : 0);
-                preparedStatement.setString(6, duoInfoRecord.gameVersion());
-                preparedStatement.setInt(7, duoInfoRecord.win() ? 1 : 0);
-                preparedStatement.setInt(8, duoInfoRecord.win() ? 0 : 1);
-                preparedStatement.addBatch();
+                if (count > 0) {
+                    sqlBuilder.append(",");
+                }
+                sqlBuilder.append("(")
+                        .append(duoInfoRecord.combiId1()).append(", ")
+                        .append(duoInfoRecord.combiId2()).append(", ")
+                        .append(duoInfoRecord.win() ? 1 : 0).append(", ")
+                        .append(duoInfoRecord.win() ? 0 : 1).append(", ")
+                        .append(duoInfoRecord.win() ? 10000 : 0).append(", '")
+                        .append(duoInfoRecord.gameVersion()).append("')");
+                count++;
             }
-            preparedStatement.executeBatch();
+
+            sqlBuilder.append(" ON DUPLICATE KEY UPDATE win = win + VALUES(win), lose = lose + VALUES(lose), win_rate = win / (win + lose) * 10000");
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString());
+            preparedStatement.executeUpdate();
+
             log.dbLog(System.currentTimeMillis() - start);
         } catch (SQLException e) {
             log.failLog("DB insertDuoInfo error" + e.getMessage());
