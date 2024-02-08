@@ -10,6 +10,8 @@ public class App {
     Database database = new Database();
     Log log = new Log();
 
+    Redis redis = new Redis();
+
     List<String> laneList = List.of("TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY");
 
     List<Combi> createSoloInfo(MatchRecord matchRecord) {
@@ -50,7 +52,7 @@ public class App {
     List<MatchDuoInfoRecord> createDuoInfo(List<Combi> combiInfos) {
         List<MatchDuoInfoRecord> matchDuoInfoRecords = new ArrayList<>();
 
-        for (int i = 0; i < combiInfos.size(); i++) {
+        for (int i = 0; i < combiInfos.size() - 1; i++) {
             for (int j = i + 1; j < combiInfos.size(); j++) {
                 Combi combi1 = combiInfos.get(i);
                 Combi combi2 = combiInfos.get(j);
@@ -98,10 +100,10 @@ public class App {
                 continue;
             }
 
-            database.insertSoloInfo(combiList);
+            redis.setSolo(combiList);
 
             List<MatchDuoInfoRecord> matchDuoInfoRecords = createDuoInfo(combiList);
-            database.insertDuoInfo(matchDuoInfoRecords);
+            redis.setDuo(matchDuoInfoRecords);
         }
 
         aws.deleteMessage(message.receiptHandle());
@@ -115,6 +117,11 @@ public class App {
 
         if(!app.database.connect()){
             app.log.failLog("DB connect fail");
+            return;
+        }
+
+        if(!app.redis.connect()){
+            app.log.failLog("AWS connect fail");
             return;
         }
 
@@ -138,8 +145,26 @@ public class App {
             }
         }
 
-        app.database.close();
-        app.log.slack("Job end");
+        String idx = "0";
+        do {
+            SoloInfoRecordList soloInfoRecords = app.redis.getSoloInfoRecordList(idx);
+            if(soloInfoRecords == null)
+                break;
+            idx = soloInfoRecords.id();
+            app.database.insertSoloInfo(soloInfoRecords.soloInfoRecordList());
+        } while (!idx.equals("0"));
 
+        idx = "0";
+        do {
+            DuoInfoRecordList duoInfoRecords = app.redis.getDuoInfoRecordList(idx);
+            if(duoInfoRecords == null)
+                break;
+            idx = duoInfoRecords.id();
+            app.database.insertDuoInfo(duoInfoRecords.duoInfoRecordList());
+        } while (!idx.equals("0"));
+
+        app.database.close();
+        app.redis.close();
+        app.log.slack("Job end");
     }
 }
