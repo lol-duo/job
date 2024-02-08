@@ -9,6 +9,8 @@ public class Database {
     public static Connection connection = null;
     AppConfig appConfig = AppConfig.getInstance();
     Log log = new Log();
+    private PreparedStatement preparedStatementSummonerId;
+    private PreparedStatement preparedStatementUpsertSummonerId;
 
     public boolean connect() {
         // 데이터베이스 연결 정보
@@ -18,6 +20,8 @@ public class Database {
 
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
+            preparedStatementSummonerId = connection.prepareStatement("SELECT summoner_id FROM user_info WHERE puuid IS NULL AND summoner_id > ? ORDER BY summoner_id LIMIT 1000");
+            preparedStatementUpsertSummonerId = connection.prepareStatement("UPDATE user_info SET puuid = ? WHERE summoner_id = ?");
         } catch (Exception e) {
             log.failLog("DB connect error" + e.getMessage());
             return false;
@@ -27,24 +31,17 @@ public class Database {
 
     public List<String> getSummonerIds(String summonerId) {
         try {
-            String sql = "SELECT summoner_id FROM user_info WHERE puuid IS NULL AND summoner_id > ? ORDER BY summoner_id LIMIT 1000";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, summonerId);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
+            preparedStatementSummonerId.setString(1, summonerId);
+            ResultSet resultSet = preparedStatementSummonerId.executeQuery();
             List<String> summonerIds = new ArrayList<>();
             while (resultSet.next()) {
                 String now = resultSet.getString("summoner_id");
                 if (now.equals("null"))
                     break;
-
                 summonerIds.add(now);
             }
-
             resultSet.close();
-            preparedStatement.close();
-
             return summonerIds;
         } catch (SQLException e) {
             log.failLog("getSummonerIds error" + e.getMessage());
@@ -55,15 +52,11 @@ public class Database {
     public void upsertPuuidBySummonerIds(SummonerRecord summonerInfo, String summonerId) {
         try {
             long startTime = System.currentTimeMillis();
-            String sql = "UPDATE user_info SET puuid = ? WHERE summoner_id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-            preparedStatement.setString(1, summonerInfo.puuid());
-            preparedStatement.setString(2, summonerId);
+            preparedStatementUpsertSummonerId.setString(1, summonerInfo.puuid());
+            preparedStatementUpsertSummonerId.setString(2, summonerId);
 
-            int insertSuccess = preparedStatement.executeUpdate();
-
-            preparedStatement.close();
+            int insertSuccess = preparedStatementUpsertSummonerId.executeUpdate();
 
             if (insertSuccess >= 1 || insertSuccess == Statement.SUCCESS_NO_INFO) {
                 log.dbLog(System.currentTimeMillis() - startTime);
@@ -77,6 +70,8 @@ public class Database {
 
     public void close() {
         try {
+            preparedStatementSummonerId.close();
+            preparedStatementUpsertSummonerId.close();
             connection.close();
         } catch (SQLException e) {
             log.failLog("DB disconnect error" + e.getMessage());
