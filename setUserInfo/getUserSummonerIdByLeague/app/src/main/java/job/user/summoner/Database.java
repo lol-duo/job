@@ -6,6 +6,7 @@ public class Database {
     AppConfig appConfig = AppConfig.getInstance();
     Log log = new Log();
     public static Connection connection = null;
+    private PreparedStatement preparedStatementSummonerId;
 
     public boolean connect() {
         // 데이터베이스 연결 정보
@@ -15,6 +16,7 @@ public class Database {
 
         try {
             connection = DriverManager.getConnection(jdbcUrl, username, password);
+            preparedStatementSummonerId = connection.prepareStatement("INSERT INTO user_info (summoner_id, league) VALUES (?, ?) ON DUPLICATE KEY UPDATE league = ?");
         } catch (Exception e) {
             log.failLog("DB connect error : " + e.getMessage());
             return false;
@@ -26,17 +28,15 @@ public class Database {
 
         try {
             long startTime = System.currentTimeMillis();
-            String sql = "INSERT INTO user_info (summoner_id, league) VALUES (?, ?) ON DUPLICATE KEY UPDATE league = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
             for (UserEntryRecord summonerId : summonerIds) {
-                preparedStatement.setString(1, summonerId.summonerId());
-                preparedStatement.setString(2, league);
-                preparedStatement.setString(3, league);
-                preparedStatement.addBatch();
+                preparedStatementSummonerId.setString(1, summonerId.summonerId());
+                preparedStatementSummonerId.setString(2, league);
+                preparedStatementSummonerId.setString(3, league);
+                preparedStatementSummonerId.addBatch();
             }
 
-            int[] insertSuccess = preparedStatement.executeBatch();
-            preparedStatement.close();
+            int[] insertSuccess = preparedStatementSummonerId.executeBatch();
 
             int successCount = 0, failCount = 0;
             for (int i = 0; i < insertSuccess.length; i++) {
@@ -59,6 +59,7 @@ public class Database {
 
     public void close() {
         try {
+            preparedStatementSummonerId.close();
             connection.close();
         } catch (SQLException e) {
             log.failLog("DB disconnect error" + e.getMessage());
