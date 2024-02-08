@@ -9,6 +9,8 @@ public class Log {
     }
 
     public void successLog(String message) {
+        if(AppConfig.activeProfile.equals("prod"))
+            return;
         String ANSI_RESET = "\u001B[0m";
         String ANSI_GREEN = "\u001B[32m";
 
@@ -24,11 +26,12 @@ public class Log {
     }
 
     public void warningLog(String message) {
+        if(AppConfig.activeProfile.equals("prod"))
+            return;
         String ANSI_RESET = "\u001B[0m";
         String ANSI_YELLOW = "\u001B[33m";
 
         System.out.println(ANSI_YELLOW + message + ANSI_RESET);
-        //slack(message);
     }
 
     public void dbLog(long time) {
@@ -38,5 +41,13 @@ public class Log {
             warningLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
         else
             successLog("DB 쿼리 성공 time: " + String.format("%7dms ", time));
+    }
+    public void redisLog(long time) {
+        if (time > 100)
+            failLog("Redis 쿼리 성공 time: " + String.format("%7dms ", time));
+        else if (time > 50)
+            warningLog("Redis 쿼리 성공 time: " + String.format("%7dms ", time));
+        else
+            successLog("Redis 쿼리 성공 time: " + String.format("%7dms ", time));
     }
 }

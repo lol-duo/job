@@ -7,12 +7,13 @@ import java.util.Properties;
 public class AppConfig {
 
     private static final AppConfig instance = new AppConfig();
-    private Properties properties = new Properties();
-    private static Log log = new Log();
+    private final Properties properties = new Properties();
+    private static final Log log = new Log();
+    public static String activeProfile;
     public AppConfig(){
 
         loadCommonProperties();  // 공통 설정 로드
-        String activeProfile = properties.getProperty("profile");
+        activeProfile = properties.getProperty("profile");
         if (activeProfile == null) {
             activeProfile = "dev"; // 기본값
         }

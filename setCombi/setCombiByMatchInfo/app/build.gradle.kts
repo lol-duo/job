@@ -24,6 +24,12 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.1")
 
+    // redis
+    implementation("redis.clients:jedis:5.1.0")
+
+    implementation("org.slf4j:slf4j-api:2.0.5")
+    implementation("org.slf4j:slf4j-simple:2.0.5")
+
     // aws sdk
     implementation("com.amazonaws:aws-java-sdk-sqs:1.12.625")
 
